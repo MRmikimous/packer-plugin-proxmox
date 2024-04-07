@@ -72,6 +72,7 @@ type isoVMCreator struct{}
 func (*isoVMCreator) Create(vmRef *proxmoxapi.VmRef, config proxmoxapi.ConfigQemu, state multistep.StateBag) error {
 	isoFile := state.Get("iso_file").(string)
 	config.QemuIso = isoFile
+	config.Description = "Packer ephemeral build VM"
 
 	client := state.Get("proxmoxClient").(*proxmoxapi.Client)
 	return config.CreateVm(vmRef, client)

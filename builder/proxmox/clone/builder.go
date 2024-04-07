@@ -49,9 +49,13 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 type cloneVMCreator struct{}
 
 func (*cloneVMCreator) Create(vmRef *proxmoxapi.VmRef, config proxmoxapi.ConfigQemu, state multistep.StateBag) error {
+	// ui := state.Get("ui").(packersdk.Ui)
+	// ui.Say(fmt.Sprintf("%#v", config))
 	client := state.Get("proxmoxClient").(*proxmoxapi.Client)
 	c := state.Get("clone-config").(*Config)
 	comm := state.Get("config").(*proxmox.Config).Comm
+
+	// ui.Say(fmt.Sprintf("%#v", c))
 
 	fullClone := 1
 	if c.FullClone.False() {
@@ -59,18 +63,24 @@ func (*cloneVMCreator) Create(vmRef *proxmoxapi.VmRef, config proxmoxapi.ConfigQ
 	}
 	config.FullClone = &fullClone
 
-	// cloud-init options
-	config.CIuser = comm.SSHUsername
-	config.Sshkeys = string(comm.SSHPublicKey)
-	config.Nameserver = c.Nameserver
-	config.Searchdomain = c.Searchdomain
-	IpconfigMap := make(map[int]interface{})
-	for idx := range c.Ipconfigs {
-		if c.Ipconfigs[idx] != (cloudInitIpconfig{}) {
-			IpconfigMap[idx] = c.Ipconfigs[idx].String()
-		}
+	if c.Agent.False() {
+		config.Agent = 0
 	}
-	config.Ipconfig = IpconfigMap
+
+	// cloud-init options
+	if c.CloudInit {
+		config.CIuser = comm.SSHUsername
+		config.Sshkeys = string(comm.SSHPublicKey)
+		config.Nameserver = c.Nameserver
+		config.Searchdomain = c.Searchdomain
+		IpconfigMap := make(map[int]interface{})
+		for idx := range c.Ipconfigs {
+			if c.Ipconfigs[idx] != (cloudInitIpconfig{}) {
+				IpconfigMap[idx] = c.Ipconfigs[idx].String()
+			}
+		}
+		config.Ipconfig = IpconfigMap
+	}
 
 	var sourceVmr *proxmoxapi.VmRef
 	if c.CloneVM != "" {
@@ -98,12 +108,10 @@ func (*cloneVMCreator) Create(vmRef *proxmoxapi.VmRef, config proxmoxapi.ConfigQ
 	if err != nil {
 		return err
 	}
-
-	if config.Tags == "config" {
-		err = config.UpdateConfig(vmRef, client)
-		if err != nil {
-			return err
-		}
+	err = config.UpdateConfig(vmRef, client)
+	if err != nil {
+		return err
 	}
+
 	return nil
 }

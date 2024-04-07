@@ -536,9 +536,9 @@ func (c *Config) Prepare(upper interface{}, raws ...interface{}) ([]string, []st
 	}
 
 	// Default qemu_agent to true
-	if c.Agent != config.TriFalse {
-		c.Agent = config.TriTrue
-	}
+	// if c.Agent != config.TriFalse {
+	// 	c.Agent = config.TriTrue
+	// }
 
 	packersdk.LogSecretFilter.Set(c.Password)
 
@@ -579,76 +579,76 @@ func (c *Config) Prepare(upper interface{}, raws ...interface{}) ([]string, []st
 		// Default to packer-[time-ordered-uuid]
 		c.VMName = fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
 	}
-	if c.Memory < 16 {
-		log.Printf("Memory %d is too small, using default: 512", c.Memory)
-		c.Memory = 512
-	}
-	if c.Memory < c.BalloonMinimum {
-		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("ballooning_minimum (%d) must be lower than memory (%d)", c.BalloonMinimum, c.Memory))
-	}
-	if c.Cores < 1 {
-		log.Printf("Number of cores %d is too small, using default: 1", c.Cores)
-		c.Cores = 1
-	}
-	if c.Sockets < 1 {
-		log.Printf("Number of sockets %d is too small, using default: 1", c.Sockets)
-		c.Sockets = 1
-	}
-	if c.CPUType == "" {
-		log.Printf("CPU type not set, using default 'kvm64'")
-		c.CPUType = "kvm64"
-	}
-	if c.OS == "" {
-		log.Printf("OS not set, using default 'other'")
-		c.OS = "other"
-	}
-	for idx, disk := range c.Disks {
-		if disk.Type == "" {
-			log.Printf("Disk %d type not set, using default 'scsi'", idx)
-			c.Disks[idx].Type = "scsi"
-		}
-		if disk.Size == "" {
-			log.Printf("Disk %d size not set, using default '20G'", idx)
-			c.Disks[idx].Size = "20G"
-		}
-		if disk.CacheMode == "" {
-			log.Printf("Disk %d cache mode not set, using default 'none'", idx)
-			c.Disks[idx].CacheMode = "none"
-		}
-		if disk.IOThread {
-			// io thread is only supported by virtio-scsi-single controller
-			if c.SCSIController != "virtio-scsi-single" {
-				errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("io thread option requires virtio-scsi-single controller"))
-			} else {
-				// ... and only for virtio and scsi disks
-				if !(disk.Type == "scsi" || disk.Type == "virtio") {
-					errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("io thread option requires scsi or a virtio disk"))
-				}
-			}
-		}
-		if disk.SSD && disk.Type == "virtio" {
-			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("SSD emulation is not supported on virtio disks"))
-		}
-		if disk.StoragePool == "" {
-			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("disks[%d].storage_pool must be specified", idx))
-		}
-		if disk.StoragePoolType != "" {
-			warnings = append(warnings, "storage_pool_type is deprecated and should be omitted, it will be removed in a later version of the proxmox plugin")
-		}
-	}
-	if len(c.Serials) > 4 {
-		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("too many serials: %d serials defined, but proxmox accepts 4 elements maximum", len(c.Serials)))
-	}
-	res := regexp.MustCompile(`^(/dev/.+|socket)$`)
-	for _, serial := range c.Serials {
-		if !res.MatchString(serial) {
-			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("serials must respond to pattern \"/dev/.+\" or be \"socket\". It was \"%s\"", serial))
-		}
-	}
-	if c.SCSIController == "" {
-		log.Printf("SCSI controller not set, using default 'lsi'")
-		c.SCSIController = "lsi"
-	}
+	// if c.Memory < 16 {
+	// 	log.Printf("Memory %d is too small, using default: 512", c.Memory)
+	// 	c.Memory = 512
+	// }
+	// if c.Memory < c.BalloonMinimum {
+	// 	errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("ballooning_minimum (%d) must be lower than memory (%d)", c.BalloonMinimum, c.Memory))
+	// }
+	// if c.Cores < 1 {
+	// 	log.Printf("Number of cores %d is too small, using default: 1", c.Cores)
+	// 	c.Cores = 1
+	// }
+	// if c.Sockets < 1 {
+	// 	log.Printf("Number of sockets %d is too small, using default: 1", c.Sockets)
+	// 	c.Sockets = 1
+	// }
+	// if c.CPUType == "" {
+	// 	log.Printf("CPU type not set, using default 'kvm64'")
+	// 	c.CPUType = "kvm64"
+	// }
+	// if c.OS == "" {
+	// 	log.Printf("OS not set, using default 'other'")
+	// 	c.OS = "other"
+	// }
+	// for idx, disk := range c.Disks {
+	// 	if disk.Type == "" {
+	// 		log.Printf("Disk %d type not set, using default 'scsi'", idx)
+	// 		c.Disks[idx].Type = "scsi"
+	// 	}
+	// 	if disk.Size == "" {
+	// 		log.Printf("Disk %d size not set, using default '20G'", idx)
+	// 		c.Disks[idx].Size = "20G"
+	// 	}
+	// 	if disk.CacheMode == "" {
+	// 		log.Printf("Disk %d cache mode not set, using default 'none'", idx)
+	// 		c.Disks[idx].CacheMode = "none"
+	// 	}
+	// 	if disk.IOThread {
+	// 		// io thread is only supported by virtio-scsi-single controller
+	// 		if c.SCSIController != "virtio-scsi-single" {
+	// 			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("io thread option requires virtio-scsi-single controller"))
+	// 		} else {
+	// 			// ... and only for virtio and scsi disks
+	// 			if !(disk.Type == "scsi" || disk.Type == "virtio") {
+	// 				errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("io thread option requires scsi or a virtio disk"))
+	// 			}
+	// 		}
+	// 	}
+	// 	if disk.SSD && disk.Type == "virtio" {
+	// 		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("SSD emulation is not supported on virtio disks"))
+	// 	}
+	// 	if disk.StoragePool == "" {
+	// 		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("disks[%d].storage_pool must be specified", idx))
+	// 	}
+	// 	if disk.StoragePoolType != "" {
+	// 		warnings = append(warnings, "storage_pool_type is deprecated and should be omitted, it will be removed in a later version of the proxmox plugin")
+	// 	}
+	// }
+	// if len(c.Serials) > 4 {
+	// 	errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("too many serials: %d serials defined, but proxmox accepts 4 elements maximum", len(c.Serials)))
+	// }
+	// res := regexp.MustCompile(`^(/dev/.+|socket)$`)
+	// for _, serial := range c.Serials {
+	// 	if !res.MatchString(serial) {
+	// 		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("serials must respond to pattern \"/dev/.+\" or be \"socket\". It was \"%s\"", serial))
+	// 	}
+	// }
+	// if c.SCSIController == "" {
+	// 	log.Printf("SCSI controller not set, using default 'lsi'")
+	// 	c.SCSIController = "lsi"
+	// }
 
 	errs = packersdk.MultiErrorAppend(errs, c.Comm.Prepare(&c.Ctx)...)
 	errs = packersdk.MultiErrorAppend(errs, c.BootConfig.Prepare(&c.Ctx)...)

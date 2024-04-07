@@ -116,7 +116,7 @@ func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multist
 		Tags:           c.Tags,
 		Boot:           c.Boot, // Boot priority, example: "order=virtio0;ide2;net0", virtio0:Disk0 -> ide0:CDROM -> net0:Network
 		QemuCpu:        c.CPUType,
-		Description:    "Packer ephemeral build VM",
+		Description:    "",
 		Memory:         c.Memory,
 		QemuCores:      c.Cores,
 		QemuSockets:    c.Sockets,
